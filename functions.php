@@ -95,7 +95,7 @@ function wpbb_insurance_woocommerce_legacy_template( $template ) {
 } add_filter('template_include','wpbb_insurance_woocommerce_legacy_template',99);
 function wpbb_insurance_woo_body_class($classes){if(function_exists('is_woocommerce')&&(is_woocommerce()||is_cart()||is_checkout()||is_account_page()))$classes[]='wp-theme-uses-woo-legacy-shell';return $classes;} add_filter('body_class','wpbb_insurance_woo_body_class');
 
-function wpbb_insurance_after_hero( $content,$profile ){if(($profile['id']??'')!=='insurance')return$content;return $content.'<!-- wp:group {"className":"wp-theme-section-shell insurance-finder-section","layout":{"type":"default"}} --><div class="wp-block-group wp-theme-section-shell insurance-finder-section"><!-- wp:wpbb/row {"containerClass":"container"} --><!-- wp:wpbb/column {"xs":12} --><!-- wp:wpbb/sector-finder {"context":"insurance","limit":12} /--><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --></div><!-- /wp:group -->';} add_filter('wp_theme_demo_after_hero_sections','wpbb_insurance_after_hero',20,2);
+function wpbb_insurance_after_hero( $content,$profile ){if(($profile['id']??'')!=='insurance')return$content;return $content.'<!-- wp:wpbb/bootstrap-div {"containerClass":"","utilityClasses":"wp-theme-section-shell insurance-finder-section","className":"wpbb-v62-section"} --><!-- wp:wpbb/row {"containerClass":"container"} --><!-- wp:wpbb/column {"xs":12} --><!-- wp:wpbb/sector-finder {"context":"insurance","limit":12} /--><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --><!-- /wp:wpbb/bootstrap-div -->';} add_filter('wp_theme_demo_after_hero_sections','wpbb_insurance_after_hero',20,2);
 function wpbb_insurance_finder_render($html,$context,$attributes){if('insurance'!==$context)return$html;$vehicle=sanitize_title(wp_unslash($_REQUEST['vehicle_type']??''));$level=sanitize_text_field(wp_unslash($_REQUEST['cover_level']??''));$max=''===(string)($_REQUEST['max_price']??'')?'':(float)$_REQUEST['max_price'];$args=array('post_type'=>'product','post_status'=>'publish','posts_per_page'=>max(1,min(24,absint($attributes['limit']??12))),'orderby'=>'menu_order title','order'=>'ASC');if($vehicle)$args['tax_query']=array(array('taxonomy'=>'product_cat','field'=>'slug','terms'=>$vehicle));if($max!=='')$args['meta_query']=array(array('key'=>'_price','value'=>$max,'compare'=>'<=','type'=>'NUMERIC'));if($level)$args['s']=$level;$query=new WP_Query($args);ob_start();?><section class="wpbb-sector-finder" data-wpbb-sector-finder><div class="wpbb-sector-finder__intro"><p class="wp-theme-sector-eyebrow"><?php echo esc_html(__( 'Cover finder', 'wp-bbtheme-child-insurance' ));?></p><h2><?php echo esc_html(__( 'Find cover for your vehicle and priorities.', 'wp-bbtheme-child-insurance' ));?></h2><p><?php echo esc_html(__( 'Compare packages, then configure billing and assistance options before continuing.', 'wp-bbtheme-child-insurance' ));?></p></div><form class="wpbb-sector-finder__form" method="get" action="<?php echo esc_url(home_url('/'));?>"><label class="wpbb-sector-finder__field"><span><?php echo esc_html(__( 'Vehicle', 'wp-bbtheme-child-insurance' ));?></span><select name="vehicle_type"><option value="">Any vehicle</option><?php foreach(array('cars'=>'Cars','vans'=>'Vans','motorbikes'=>'Motorbikes','mobility'=>'Mobility') as $v=>$label):?><option value="<?php echo esc_attr($v);?>" <?php selected($vehicle,$v);?>><?php echo esc_html($label);?></option><?php endforeach;?></select></label><label class="wpbb-sector-finder__field"><span><?php echo esc_html(__( 'Cover level', 'wp-bbtheme-child-insurance' ));?></span><select name="cover_level"><option value="">Any level</option><?php foreach(array('Roadside','Plus','Home','Euro') as $v):?><option value="<?php echo esc_attr($v);?>" <?php selected($level,$v);?>><?php echo esc_html($v);?></option><?php endforeach;?></select></label><label class="wpbb-sector-finder__field"><span><?php echo esc_html(__( 'Max monthly price', 'wp-bbtheme-child-insurance' ));?></span><input type="number" step="1" min="0" name="max_price" value="<?php echo esc_attr($max);?>"></label><div class="wpbb-sector-finder__actions"><button class="btn btn-primary" type="submit"><?php echo esc_html(__( 'Find cover', 'wp-bbtheme-child-insurance' ));?></button></div></form><div class="wpbb-sector-finder__results"><div class="wpbb-sector-finder__results-head"><strong><?php echo esc_html(sprintf(_n('%d package','%d packages',$query->found_posts,'wp-bbtheme-child-insurance'),$query->found_posts));?></strong><span><?php echo esc_html(__( 'matching your choices', 'wp-bbtheme-child-insurance' ));?></span></div><div class="wpbb-sector-grid"><?php while($query->have_posts()):$query->the_post();$product=function_exists('wc_get_product')?wc_get_product(get_the_ID()):null;?><article class="wpbb-sector-card"><a class="wpbb-sector-card__media" href="<?php the_permalink();?>"><?php echo function_exists('wp_theme_item_gallery_card_inner') ? wp_theme_item_gallery_card_inner(get_the_ID(),'woocommerce_thumbnail',4) : get_the_post_thumbnail(get_the_ID(),'woocommerce_thumbnail');?></a><div class="wpbb-sector-card__body"><p class="wp-theme-sector-eyebrow"><?php echo esc_html(wp_strip_all_tags(wc_get_product_category_list(get_the_ID(),', ')));?></p><h3><a href="<?php the_permalink();?>"><?php the_title();?></a></h3><p><?php echo esc_html(get_the_excerpt());?></p><?php if($product):?><div class="wpbb-sector-card__meta"><span><small><?php echo esc_html(__( 'From', 'wp-bbtheme-child-insurance' ));?></small><strong><?php echo wp_kses_post($product->get_price_html());?></strong></span><span><small><?php echo esc_html(__( 'Purchase', 'wp-bbtheme-child-insurance' ));?></small><strong><?php echo esc_html(__( 'Monthly / yearly', 'wp-bbtheme-child-insurance' ));?></strong></span></div><?php endif;?><a class="wpbb-sector-card__link" href="<?php the_permalink();?>"><?php echo esc_html(__( 'Configure cover →', 'wp-bbtheme-child-insurance' ));?></a></div></article><?php endwhile;wp_reset_postdata();?></div></div></section><?php return ob_get_clean();} add_filter('wp_theme_sector_finder_render','wpbb_insurance_finder_render',20,3);
 function wpbb_insurance_product_options(){if(!is_product())return;?><div class="insurance-product-options"><h3><?php echo esc_html(__( 'Configure your cover', 'wp-bbtheme-child-insurance' ));?></h3><p class="form-row"><label><?php echo esc_html(__( 'Vehicle type', 'wp-bbtheme-child-insurance' ));?><select name="insurance_vehicle_type" required><option value="Cars">Cars</option><option value="Vans">Vans</option><option value="Motorbikes">Motorbikes</option><option value="Mobility">Mobility</option></select></label></p><p class="form-row"><label><?php echo esc_html(__( 'Billing cycle', 'wp-bbtheme-child-insurance' ));?><select name="insurance_billing_cycle" required><option value="monthly">Monthly</option><option value="yearly">Yearly — demo 10.5× monthly price</option></select></label></p><p class="form-row"><label><input type="checkbox" name="insurance_home_assistance" value="1"> <?php echo esc_html(__( 'Add home assistance preference', 'wp-bbtheme-child-insurance' ));?></label></p></div><?php } add_action('woocommerce_before_add_to_cart_button','wpbb_insurance_product_options',18);
 function wpbb_insurance_validate_options($passed,$product_id,$quantity){$vehicle=sanitize_text_field(wp_unslash($_POST['insurance_vehicle_type']??''));$billing=sanitize_key(wp_unslash($_POST['insurance_billing_cycle']??''));if(!in_array($vehicle,array('Cars','Vans','Motorbikes','Mobility'),true)||!in_array($billing,array('monthly','yearly'),true)){wc_add_notice(__( 'Please choose a valid vehicle type and billing cycle.', 'wp-bbtheme-child-insurance' ),'error');return false;}return$passed;}add_filter('woocommerce_add_to_cart_validation','wpbb_insurance_validate_options',10,3);
@@ -362,35 +362,35 @@ if ( ! function_exists( 'wpbb_child_demo_integrity_guard_v381029' ) ) {
         $services = ! empty( $profile['services'] ) && is_array( $profile['services'] ) ? array_slice( $profile['services'], 0, 4 ) : array();
         $stats = ! empty( $profile['stats'] ) && is_array( $profile['stats'] ) ? array_slice( $profile['stats'], 0, 4 ) : array();
 
-        $out = '<!-- wp:group {"className":"wp-theme-section-shell wp-theme-sector-hero wp-theme-demo-repair","layout":{"type":"default"}} --><div class="wp-block-group wp-theme-section-shell wp-theme-sector-hero wp-theme-demo-repair"><!-- wp:wpbb/row {"containerClass":"container","customClasses":"align-items-center"} --><!-- wp:wpbb/column {"xs":12,"lg":6} --><p class="wp-theme-sector-eyebrow">' . esc_html( $eyebrow ) . '</p><h1>' . esc_html( $title ) . '</h1><p class="wp-theme-sector-lead">' . esc_html( $intro ) . '</p><div class="wp-theme-demo-buttons"><a class="btn btn-primary" href="' . esc_url( $primary_url ) . '">' . esc_html( $primary_label ) . '</a><a class="btn btn-outline-primary" href="' . esc_url( $secondary_url ) . '">' . esc_html( $secondary_label ) . '</a></div><!-- /wp:wpbb/column -->';
+        $out = '<!-- wp:wpbb/bootstrap-div {"containerClass":"","utilityClasses":"wp-theme-section-shell wp-theme-sector-hero wp-theme-demo-repair","className":"wpbb-v62-section"} --><!-- wp:wpbb/row {"containerClass":"container","customClasses":"align-items-center"} --><!-- wp:wpbb/column {"xs":12,"lg":6} --><p class="wp-theme-sector-eyebrow">' . esc_html( $eyebrow ) . '</p><h1>' . esc_html( $title ) . '</h1><p class="wp-theme-sector-lead">' . esc_html( $intro ) . '</p><div class="wp-theme-demo-buttons"><a class="btn btn-primary" href="' . esc_url( $primary_url ) . '">' . esc_html( $primary_label ) . '</a><a class="btn btn-outline-primary" href="' . esc_url( $secondary_url ) . '">' . esc_html( $secondary_label ) . '</a></div><!-- /wp:wpbb/column -->';
         if ( $hero_image ) $out .= '<!-- wp:wpbb/column {"xs":12,"lg":6} --><figure class="wp-theme-sector-page-image"><img src="' . $hero_image . '" alt="" loading="eager" decoding="async"></figure><!-- /wp:wpbb/column -->';
-        $out .= '<!-- /wp:wpbb/row --></div><!-- /wp:group -->';
+        $out .= '<!-- /wp:wpbb/row --><!-- /wp:wpbb/bootstrap-div -->';
 
         if ( 'automotive' === ( $profile['id'] ?? '' ) ) {
-            $out .= '<!-- wp:group {"className":"wp-theme-section-shell wpbb-automotive-finder-section","layout":{"type":"default"}} --><div class="wp-block-group wp-theme-section-shell wpbb-automotive-finder-section" id="finder"><!-- wp:wpbb/row {"containerClass":"container"} --><!-- wp:wpbb/column {"xs":12} --><!-- wp:wpbb/sector-finder {"context":"automotive","limit":8} /--><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --></div><!-- /wp:group -->';
+            $out .= '<!-- wp:wpbb/bootstrap-div {"containerClass":"","utilityClasses":"wp-theme-section-shell wpbb-automotive-finder-section","className":"wpbb-v62-section"} --><!-- wp:wpbb/row {"containerClass":"container"} --><!-- wp:wpbb/column {"xs":12} --><!-- wp:wpbb/sector-finder {"context":"automotive","limit":8} /--><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --><!-- /wp:wpbb/bootstrap-div -->';
         }
 
-        $out .= '<!-- wp:group {"className":"wp-theme-section-shell wp-theme-services-section","layout":{"type":"default"}} --><div class="wp-block-group wp-theme-section-shell wp-theme-services-section"><!-- wp:wpbb/row {"containerClass":"container"} --><!-- wp:wpbb/column {"xs":12} --><p class="wp-theme-sector-eyebrow">' . esc_html( (string) ( $profile['services_eyebrow'] ?? __( 'Services', 'wp-theme' ) ) ) . '</p><h2>' . esc_html( $services_heading ) . '</h2><!-- wp:wpbb/row {"gutterX":"gx-4","gutterY":"gy-4"} -->';
+        $out .= '<!-- wp:wpbb/bootstrap-div {"containerClass":"","utilityClasses":"wp-theme-section-shell wp-theme-services-section","className":"wpbb-v62-section"} --><!-- wp:wpbb/row {"containerClass":"container"} --><!-- wp:wpbb/column {"xs":12} --><p class="wp-theme-sector-eyebrow">' . esc_html( (string) ( $profile['services_eyebrow'] ?? __( 'Services', 'wp-theme' ) ) ) . '</p><h2>' . esc_html( $services_heading ) . '</h2><!-- wp:wpbb/row {"gutterX":"gx-4","gutterY":"gy-4"} -->';
         foreach ( $services as $service ) {
             $service_title = is_array( $service ) ? (string) ( $service[0] ?? '' ) : '';
             $service_text = is_array( $service ) ? (string) ( $service[1] ?? '' ) : '';
             if ( '' === trim( $service_title ) ) continue;
             $out .= '<!-- wp:wpbb/column {"xs":12,"md":6,"lg":3} --><article class="wp-theme-sector-card"><h3>' . esc_html( $service_title ) . '</h3><p>' . esc_html( $service_text ) . '</p></article><!-- /wp:wpbb/column -->';
         }
-        $out .= '<!-- /wp:wpbb/row --><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --></div><!-- /wp:group -->';
+        $out .= '<!-- /wp:wpbb/row --><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --><!-- /wp:wpbb/bootstrap-div -->';
 
-        $out .= '<!-- wp:group {"className":"wp-theme-section-shell wp-theme-about-section","layout":{"type":"default"}} --><div class="wp-block-group wp-theme-section-shell wp-theme-about-section"><!-- wp:wpbb/row {"containerClass":"container","customClasses":"align-items-center"} -->';
+        $out .= '<!-- wp:wpbb/bootstrap-div {"containerClass":"","utilityClasses":"wp-theme-section-shell wp-theme-about-section","className":"wpbb-v62-section"} --><!-- wp:wpbb/row {"containerClass":"container","customClasses":"align-items-center"} -->';
         if ( $about_image ) $out .= '<!-- wp:wpbb/column {"xs":12,"lg":6} --><figure class="wp-theme-sector-page-image"><img src="' . $about_image . '" alt="" loading="lazy" decoding="async"></figure><!-- /wp:wpbb/column -->';
-        $out .= '<!-- wp:wpbb/column {"xs":12,"lg":6} --><p class="wp-theme-sector-eyebrow">' . esc_html( (string) ( $profile['about_eyebrow'] ?? __( 'About', 'wp-theme' ) ) ) . '</p><h2>' . esc_html( $about_title ) . '</h2><p class="wp-theme-sector-lead">' . esc_html( $about_text ) . '</p><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --></div><!-- /wp:group -->';
+        $out .= '<!-- wp:wpbb/column {"xs":12,"lg":6} --><p class="wp-theme-sector-eyebrow">' . esc_html( (string) ( $profile['about_eyebrow'] ?? __( 'About', 'wp-theme' ) ) ) . '</p><h2>' . esc_html( $about_title ) . '</h2><p class="wp-theme-sector-lead">' . esc_html( $about_text ) . '</p><!-- /wp:wpbb/column --><!-- /wp:wpbb/row --><!-- /wp:wpbb/bootstrap-div -->';
 
         if ( $stats ) {
-            $out .= '<!-- wp:group {"className":"wp-theme-section-shell wp-theme-sector-proof","layout":{"type":"default"}} --><div class="wp-block-group wp-theme-section-shell wp-theme-sector-proof"><!-- wp:wpbb/row {"containerClass":"container","gutterX":"gx-3","gutterY":"gy-3"} -->';
+            $out .= '<!-- wp:wpbb/bootstrap-div {"containerClass":"","utilityClasses":"wp-theme-section-shell wp-theme-sector-proof","className":"wpbb-v62-section"} --><!-- wp:wpbb/row {"containerClass":"container","gutterX":"gx-3","gutterY":"gy-3"} -->';
             foreach ( $stats as $stat ) {
                 $number = is_array( $stat ) ? (string) ( $stat[0] ?? '' ) : '';
                 $label = is_array( $stat ) ? (string) ( $stat[1] ?? '' ) : '';
                 $out .= '<!-- wp:wpbb/column {"xs":6,"lg":3} --><div class="wp-theme-sector-proof__item"><h3>' . esc_html( $number ) . '</h3><p>' . esc_html( $label ) . '</p></div><!-- /wp:wpbb/column -->';
             }
-            $out .= '<!-- /wp:wpbb/row --></div><!-- /wp:group -->';
+            $out .= '<!-- /wp:wpbb/row --><!-- /wp:wpbb/bootstrap-div -->';
         }
 
         $out .= '<!-- wp:wpbb/cta-section {"title":"' . esc_attr( (string) ( $profile['cta_title'] ?? __( 'Ready to make it yours?', 'wp-theme' ) ) ) . '","titleTag":"h2","text":"' . esc_attr( (string) ( $profile['cta_text'] ?? $intro ) ) . '","buttonText":"' . esc_attr( $primary_label ) . '","buttonUrl":"' . esc_url( $primary_url ) . '","className":"wp-theme-home-cta wp-theme-home-cta--bbuilder"} /-->';
@@ -769,3 +769,71 @@ if ( ! function_exists( 'wpbb_child_381047_force_woo_legacy_template' ) ) {
     }
 }
 add_filter( 'template_include', 'wpbb_child_381047_force_woo_legacy_template', PHP_INT_MAX );
+
+// v3.8.10.64 shared BBuilder/demo consistency layer.
+require_once get_stylesheet_directory() . '/inc/bbuilder-system-v62.php';
+
+/**
+ * v3.8.10.64 PWA endpoint hardening.
+ *
+ * The parent theme links to ?wpbb-pwa=manifest and registers
+ * ?wpbb-pwa=service-worker. Serve those endpoints before the normal template
+ * loader so browsers always receive the expected MIME type and valid payload.
+ * The service worker intentionally has no fetch handler: this prevents stale
+ * worker-cached ES modules from causing Chromium cross-world preload warnings.
+ */
+if ( ! function_exists( 'wpbb_child_381063_serve_pwa_endpoint' ) ) {
+    function wpbb_child_381063_serve_pwa_endpoint() {
+        if ( empty( $_GET['wpbb-pwa'] ) ) return;
+        $mode = sanitize_key( wp_unslash( $_GET['wpbb-pwa'] ) );
+        if ( ! in_array( $mode, array( 'manifest', 'service-worker' ), true ) ) return;
+
+        while ( ob_get_level() ) {
+            @ob_end_clean();
+        }
+        nocache_headers();
+        header( 'X-Content-Type-Options: nosniff' );
+
+        if ( 'manifest' === $mode ) {
+            header( 'Content-Type: application/manifest+json; charset=UTF-8' );
+            $name = trim( (string) get_bloginfo( 'name' ) );
+            if ( '' === $name ) $name = 'WP Base';
+            $scope = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+            if ( '' === $scope ) $scope = '/';
+            $icons = array();
+            foreach ( array( 192, 512 ) as $size ) {
+                $file = get_stylesheet_directory() . '/assets/icons/icon-' . $size . '.png';
+                if ( is_readable( $file ) ) {
+                    $icons[] = array(
+                        'src' => get_stylesheet_directory_uri() . '/assets/icons/icon-' . $size . '.png',
+                        'sizes' => $size . 'x' . $size,
+                        'type' => 'image/png',
+                        'purpose' => 'any maskable',
+                    );
+                }
+            }
+            echo wp_json_encode( array(
+                'name' => $name,
+                'short_name' => function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 24 ) : substr( $name, 0, 24 ),
+                'start_url' => home_url( '/' ),
+                'scope' => $scope,
+                'display' => 'standalone',
+                'background_color' => '#ffffff',
+                'theme_color' => '#3155D9',
+                'icons' => $icons,
+            ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+            exit;
+        }
+
+        header( 'Content-Type: application/javascript; charset=UTF-8' );
+        header( 'Service-Worker-Allowed: /' );
+        echo "self.addEventListener('install',function(event){self.skipWaiting();});\n";
+        echo "self.addEventListener('activate',function(event){event.waitUntil((async function(){try{var keys=await caches.keys();await Promise.all(keys.filter(function(k){return /^(wpbb|wp-theme|wpbase)/i.test(k);}).map(function(k){return caches.delete(k);}));}catch(e){}await self.clients.claim();})());});\n";
+        exit;
+    }
+    add_action( 'template_redirect', 'wpbb_child_381063_serve_pwa_endpoint', -9999 );
+}
+// v3.8.10.75 commerce consistency and managed-demo media repair.
+require_once get_stylesheet_directory() . '/inc/v74-commerce.php';
+// v3.8.10.75 structural/media/Woo repair.
+require_once get_stylesheet_directory() . '/inc/v75-suite.php';
